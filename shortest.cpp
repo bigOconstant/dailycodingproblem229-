@@ -100,13 +100,10 @@ void findShortestPath(vector<vector<int>> graph,std::unordered_map<int,std::pair
 
     // Recurse to finish
      findShortestPath(graph,table,checked,unchecked);
-
-
-
 }
 
 int main(){
-    cout<<"starting app"<<endl;
+    cout<<"dijkstra's algorithm"<<endl;
 
 
     vector<vector<int>> graph{
