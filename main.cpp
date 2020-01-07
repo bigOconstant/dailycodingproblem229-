@@ -1,39 +1,124 @@
 #include <iostream>
 #include <array>
 #include <vector>
- #include <limits>
+#include <limits>
+#include <unordered_map>
  #define __STDC_LIMIT_MACROS
 #define BOARD_SIZE 100
+using namespace std;
 bool containsSnakeOrLadder(int row,std::vector<std::pair<int,int>> const & input);
 
+void findShortestPath(vector<vector<int>> graph,std::unordered_map<int,std::pair<int,int>> &table,vector<std::pair<int,int>> checked,vector<std::pair<int,int>> &unchecked){
+    //Base case
+
+    if(unchecked.size() <1){
+        return;//
+    }
+
+    //Sort unvisited list by distance from source. 
+    
+    auto currentitem = unchecked.back();
+
+    for(auto it = unchecked.begin(); it < unchecked.end(); ++it){
+        if((*it).second < currentitem.second){
+            currentitem = (*it); // set current item to smallest distance from source
+        }
+    }
+
+
+    //Remove item we won't look at it again
+    auto i = 0;
+    auto counter = 0;
+    for(auto it = unchecked.begin(); it < unchecked.end(); ++it){
+        if((*it).first == currentitem.first){
+            counter = i;
+        }
+        ++i;
+    }
+
+
+    unchecked.erase(unchecked.begin()+counter);
+
+    //Get neighbors of current item
+
+    auto const row = graph[currentitem.first];
+
+    vector<int> neighbors;
+
+    counter = 0;
+    for(auto it = row.begin(); it < row.end(); ++it){
+        if(counter != currentitem.first && (*it) >0){
+            neighbors.push_back(counter);
+        }
+        ++counter;
+    }
+
+    //if neighbors not in checked and not in unchecked put them in unchecked
+
+    for(auto it = neighbors.begin(); it < neighbors.end(); ++it){
+        bool found = false;
+        for(auto jit = unchecked.begin(); jit < unchecked.end(); ++jit){
+            if((*jit).first == (*it)){
+                found = true;
+                break;
+            }
+        }
+        
+        for(auto jit = checked.begin(); jit < checked.end(); ++jit){
+            if((*jit).first == (*it)){
+                            found = true;
+                            break;
+              }
+        }
+
+        if(!found  ){
+
+            unchecked.push_back({(*it),table[(*it)].second});
+        }
+    }
+
+
+    //if distance from current item to each neighbor is less than the neighbor's items's distance, update distance to shorter value
+
+    for(auto it = neighbors.begin(); it < neighbors.end(); ++it){
+        auto newdistance =  graph[currentitem.first][(*it)] + table[currentitem.first].first;
+        if(newdistance < table[(*it)].first){ //This is what makes it a "Greedy Algorithm"
+            table[(*it)].first = newdistance;
+            table[(*it)].second = currentitem.first; //Update previous
+
+            
+        }
+    }
+
+    //Put current item in visited list remove it from unvisted list.
+    checked.push_back(currentitem);
+
+    //Update sizes. They have have changed for both
+    for(auto it = checked.begin(); it < checked.end(); ++it){
+        (*it).second = table[(*it).first].first;
+    }
+    for(auto it = unchecked.begin(); it < unchecked.end(); ++it){
+        (*it).second = table[(*it).first].first;
+    }
+
+
+    // Recurse to finish
+     findShortestPath(graph,table,checked,unchecked);
+}
+
 void printvector(std::vector<std::vector<int>> graph){
+    int counter = 1;
     for(auto it = graph.begin(); it < graph.end(); ++it){
+        cout<<counter<<".";
         for(auto jit = (*it).begin(); jit < (*it).end(); ++jit){
             std::cout<<"["<<(*jit)<<"]";
         }
+        ++counter;
         std::cout<<"\n";
     }
 }
 
-bool filloutshortestpath(int row,int step,std::vector<int> &shortestpatharray,std::vector<std::vector<int>> graph){
 
-   if(step < shortestpatharray[row] ){
-       shortestpatharray[row] = step;
-   }
-   if(row ==99){ //base case
-
-       return true;
-   }
-   
-   // Only look for forward moving jumps
-   for(int i = (row +1) ; i < BOARD_SIZE  ; ++i){
-       if(graph[row][i] >0){
-          auto hitlast= filloutshortestpath(i,step+1,shortestpatharray,graph);
-       }
-   }
-   return true;
-
-}
 
 
 int main(){
@@ -96,17 +181,30 @@ int main(){
         }
     }
 
-    std::vector<int> shortestpatharray;
+    std::unordered_map<int,std::pair<int,int>> table;
+    table.insert({0,{0,0}});
 
     for(int i = 0; i < BOARD_SIZE; ++i) {
-        shortestpatharray.push_back(INT8_MAX);
+        if(i ==0){
+            table.insert({0,{0,0}});
+        }else{
+         table.insert({i,{INT32_MAX,i}});
+        }
     }
 
-   filloutshortestpath(0,0,shortestpatharray,graph);
-  
-   for(int i =0; i < BOARD_SIZE; ++i){
-        std::cout<<"shortest:"<<i<<" :"<<shortestpatharray[i]<<std::endl;
-   }
+    vector<std::pair<int,int>> checked{};
+    vector<std::pair<int,int>> unchecked {{0,0}};
+
+    findShortestPath(graph,table,checked,unchecked);
+
+    cout<<"printing table"<<endl;
+
+    for(int i = 0; i < BOARD_SIZE; ++i){
+        cout<<"cell "<<i+1 <<":distance from source- "<<(table[i].first)<<" prev:"<<(table[i].second+1)<<endl;
+    }
+
+    
+   
 }
 bool containsSnakeOrLadder(int row,std::vector<std::pair<int,int>> const & input){
    for(auto it = input.begin(); it < input.end(); ++it){
