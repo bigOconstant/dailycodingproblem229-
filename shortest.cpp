@@ -4,11 +4,6 @@
 #include <algorithm>
 using namespace std;
 
-bool compairpair(std::pair<int,int> p1,std::pair<int,int> p2){
-    return(p1.second > p2.first);
-}
-
-
 void findShortestPath(vector<vector<int>> graph,std::unordered_map<int,std::pair<int,int>> &table,vector<std::pair<int,int>> checked,vector<std::pair<int,int>> &unchecked){
     //Base case
 
@@ -17,14 +12,12 @@ void findShortestPath(vector<vector<int>> graph,std::unordered_map<int,std::pair
     }
 
     //Sort unvisited list by distance from source. 
-    //current item =
-    //std::sort(unchecked.begin(),unchecked.end(),compairpair); //Don't need to actually sort just need to find the smallest one. go back to speed this up. 
-    auto blah = 10;
+    
     auto currentitem = unchecked.back();
 
     for(auto it = unchecked.begin(); it < unchecked.end(); ++it){
         if((*it).second < currentitem.second){
-            currentitem = (*it);
+            currentitem = (*it); // set current item to smallest distance from source
         }
     }
 
@@ -39,12 +32,6 @@ void findShortestPath(vector<vector<int>> graph,std::unordered_map<int,std::pair
         ++i;
     }
 
-    std::cout<<"current item:"<<currentitem.first<<endl;
-
- for(int i = 0; i < 5; ++i){
-        cout<<"cell"<<i <<":distance from source"<<table[i].first<<" prev:"<<table[i].second<<endl;
-    }
-
 
     unchecked.erase(unchecked.begin()+counter);
 
@@ -54,8 +41,7 @@ void findShortestPath(vector<vector<int>> graph,std::unordered_map<int,std::pair
 
     vector<int> neighbors;
 
-
-     counter = 0;
+    counter = 0;
     for(auto it = row.begin(); it < row.end(); ++it){
         if(counter != currentitem.first && (*it) >0){
             neighbors.push_back(counter);
@@ -112,9 +98,7 @@ void findShortestPath(vector<vector<int>> graph,std::unordered_map<int,std::pair
     }
 
 
-    // Recurse function
-
-
+    // Recurse to finish
      findShortestPath(graph,table,checked,unchecked);
 
 
@@ -148,10 +132,7 @@ int main(){
     cout<<"printing table"<<endl;
 
     for(int i = 0; i < 5; ++i){
-        cout<<"cell"<<i <<":distance from source"<<table[i].first<<" prev:"<<table[i].second<<endl;
+        cout<<"cell "<<i <<":distance from source "<<table[i].first<<" prev:"<<table[i].second<<endl;
     }
-
-
-
 
 }
