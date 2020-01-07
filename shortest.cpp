@@ -78,7 +78,7 @@ void findShortestPath(vector<vector<int>> graph,std::unordered_map<int,std::pair
 
     for(auto it = neighbors.begin(); it < neighbors.end(); ++it){
         auto newdistance =  graph[currentitem.first][(*it)] + table[currentitem.first].first;
-        if(newdistance < table[(*it)].first){
+        if(newdistance < table[(*it)].first){ //This is what makes it a "Greedy Algorithm"
             table[(*it)].first = newdistance;
             table[(*it)].second = currentitem.first; //Update previous
 
